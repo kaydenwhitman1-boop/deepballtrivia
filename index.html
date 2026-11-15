@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep Ball — Daily NFL Ranking Trivia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b14; --bg2:#0d1526; --card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.08);
+  --line:rgba(255,255,255,.09); --text:#eef2f8; --muted:#8b97ad; --dim:#5b6780;
+  --lime:#b8ff3c; --lime2:#7dd61a; --gold:#ffc940; --red:#ff4d5e; --blue:#4da3ff;
+  --radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);
+  background:
+    radial-gradient(1200px 600px at 15% -10%,rgba(125,214,26,.16),transparent 60%),
+    radial-gradient(900px 500px at 110% 10%,rgba(77,163,255,.13),transparent 60%),
+    linear-gradient(180deg,var(--bg2),var(--bg) 60%);
+  background-attachment:fixed;
+}
+body::before{ /* yard lines */
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;
+  background:repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.035) 119px 121px);
+  mask-image:linear-gradient(180deg,#000,transparent 85%);
+}
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:22px 18px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--lime),var(--lime2));box-shadow:0 8px 30px rgba(184,255,60,.35)}
+.brand h1{font-family:"Bebas Neue",Impact,sans-serif;font-size:38px;letter-spacing:2px;line-height:.9}
+.brand h1 span{color:var(--lime)}
+.brand small{display:block;color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+nav{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);padding:5px;border-radius:999px;backdrop-filter:blur(10px)}
+nav button{background:none;border:0;color:var(--muted);font:600 14px Inter,sans-serif;padding:9px 16px;border-radius:999px;cursor:pointer;transition:.2s}
+nav button:hover{color:var(--text)}
+nav button.on{background:var(--text);color:#0a0f1a}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(14px)}
+.hero{padding:22px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--lime)}
+.hero h2{font-family:"Bebas Neue",sans-serif;font-size:44px;letter-spacing:1px;line-height:1;margin-top:4px}
+.hero p{color:var(--muted);font-size:14px;margin-top:6px}
+.roundchips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--muted)}
+.chip b{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.08);font-size:12px;color:var(--text)}
+.chip.cur{border-color:rgba(184,255,60,.55);color:var(--text);background:rgba(184,255,60,.08)}
+.chip.cur b{background:var(--lime);color:#0a0f1a}
+.chip.done{opacity:.75}
+.chip.done b{background:var(--gold);color:#0a0f1a}
+button.chip{font-family:inherit;transition:.18s}
+.chip.click{cursor:pointer}
+.chip.click:hover{border-color:rgba(255,255,255,.35);color:var(--text);opacity:1;transform:translateY(-1px)}
+.chip.done.cur{opacity:1;border-color:rgba(255,201,64,.6);background:rgba(255,201,64,.08)}
+.chip.locked{opacity:.45;cursor:not-allowed}
+.chip .cp{font-size:11px;font-weight:800;color:var(--gold);margin-left:2px}
+button.srow{width:100%;font-family:inherit;color:var(--text);cursor:pointer;transition:.18s}
+button.srow:hover{border-color:rgba(184,255,60,.45);background:rgba(184,255,60,.06);transform:translateY(-1px)}
+.viewlink{color:var(--lime);font-weight:700}
+
+.game{padding:24px}
+.ghead{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.cat h3{font-family:"Bebas Neue",sans-serif;font-size:40px;letter-spacing:1px;line-height:1}
+.cat p{color:var(--muted);font-size:14px;margin-top:6px}
+.scorebox{display:flex;gap:10px}
+.stat{min-width:92px;padding:10px 14px;border-radius:14px;background:rgba(0,0,0,.25);border:1px solid var(--line);text-align:center}
+.stat .v{font-family:"Bebas Neue",sans-serif;font-size:32px;line-height:1}
+.stat .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-top:2px}
+.strikes{display:flex;gap:6px;justify-content:center;margin-top:4px;height:26px;align-items:center}
+.strike{width:24px;height:24px;border-radius:50%;border:2px solid rgba(255,255,255,.18);display:grid;place-items:center;font-weight:800;font-size:13px;color:transparent;transition:.25s}
+.strike.x{background:var(--red);border-color:var(--red);color:#fff;transform:scale(1.08);box-shadow:0 0 18px rgba(255,77,94,.6)}
+
+.inputrow{display:flex;gap:10px;margin:22px 0 10px}
+.inputrow input{flex:1;min-width:0;background:rgba(0,0,0,.35);border:1.5px solid var(--line);border-radius:14px;padding:15px 18px;color:var(--text);font:600 17px Inter,sans-serif;outline:none;transition:.2s}
+.inputrow input:focus{border-color:var(--lime);box-shadow:0 0 0 4px rgba(184,255,60,.12)}
+.acwrap{position:relative;flex:1;min-width:0;display:flex}
+.acwrap input{width:100%}
+.ac{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;background:#111b30;border:1px solid rgba(184,255,60,.35);border-radius:14px;padding:6px;box-shadow:0 18px 40px rgba(0,0,0,.55);display:none;max-height:340px;overflow-y:auto}
+.ac.show{display:block}
+.ac .opt{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:600;font-size:15px;color:#c9d2e2}
+.ac .opt mark{background:none;color:var(--lime);font-weight:800}
+.ac .opt.on,.ac .opt:hover{background:rgba(184,255,60,.12);color:var(--text)}
+.ac .opt small{font-size:11px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+.ac .none{padding:10px 12px;color:var(--dim);font-size:13px}
+.btn{border:0;border-radius:14px;padding:0 22px;font:800 15px Inter,sans-serif;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,var(--lime),var(--lime2));color:#0a0f1a;box-shadow:0 8px 24px rgba(184,255,60,.25)}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line);padding:12px 18px}
+.btn.ghost:hover{background:rgba(255,255,255,.1)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.feedback{min-height:24px;font-weight:600;font-size:14px;transition:.2s}
+.feedback.good{color:var(--lime)} .feedback.bad{color:var(--red)} .feedback.meh{color:var(--gold)}
+.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;margin-top:14px}
+.tile{position:relative;height:66px;perspective:800px}
+.tile .in{position:absolute;inset:0;transition:transform .55s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d}
+.tile.flip .in{transform:rotateX(180deg)}
+.face{position:absolute;inset:0;border-radius:13px;display:flex;align-items:center;gap:10px;padding:0 12px;backface-visibility:hidden;border:1px solid var(--line)}
+.front{background:rgba(255,255,255,.035)}
+.front .rk{font-family:"Bebas Neue",sans-serif;font-size:26px;color:var(--dim);width:34px}
+.front .bar{flex:1;height:8px;border-radius:6px;background:rgba(255,255,255,.06)}
+.back{transform:rotateX(180deg);background:linear-gradient(135deg,rgba(184,255,60,.20),rgba(125,214,26,.07));border-color:rgba(184,255,60,.45)}
+.back .rk{font-family:"Bebas Neue",sans-serif;font-size:26px;color:var(--lime);width:34px;flex:none}
+.back .nm{font-weight:700;font-size:14px;line-height:1.15}
+.back .vl{font-size:12px;color:var(--muted);margin-top:2px}
+.back .pts{position:absolute;top:7px;right:9px;font-size:11px;font-weight:800;color:#0a0f1a;background:var(--lime);padding:2px 6px;border-radius:6px}
+.tile.missed .back{background:rgba(255,255,255,.04);border-color:var(--line)}
+.tile.missed .back .rk{color:var(--dim)} .tile.missed .back .nm{color:var(--muted)} .tile.missed .pts{display:none}
+.tile.deep .front .bar{background:linear-gradient(90deg,rgba(255,201,64,.25),rgba(255,201,64,.05))}
+.tile.pop{animation:pop .6s}
+@keyframes pop{50%{transform:scale(1.06)}}
+
+.endbar{display:none;margin-top:20px;padding:18px;border-radius:14px;background:rgba(0,0,0,.28);border:1px solid var(--line);align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.endbar.show{display:flex}
+.endbar .msg{font-weight:700}
+.endbar .msg small{display:block;color:var(--muted);font-weight:500;margin-top:3px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.under{display:flex;justify-content:space-between;margin-top:14px;gap:10px;flex-wrap:wrap;color:var(--dim);font-size:12px}
+.linkish{background:none;border:0;color:var(--muted);font:600 13px Inter,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+.summary{padding:30px;text-align:center}
+.summary .big{font-family:"Bebas Neue",sans-serif;font-size:96px;line-height:1;background:linear-gradient(135deg,var(--lime),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.summary .rows{max-width:520px;margin:22px auto;display:grid;gap:10px}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);text-align:left}
+.srow .t{font-weight:700}.srow .s{font-size:12px;color:var(--muted);margin-top:2px}
+.srow .p{font-family:"Bebas Neue",sans-serif;font-size:30px;color:var(--lime)}
+.statsgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:520px;margin:0 auto 22px}
+.countdown{color:var(--muted);font-size:14px;margin-top:18px}
+.countdown b{color:var(--text);font-variant-numeric:tabular-nums}
+.sharebox{display:none;width:100%;max-width:520px;margin:12px auto 0;background:rgba(0,0,0,.35);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font:13px ui-monospace,monospace;height:120px}
+
+.freegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;padding:6px 0}
+.fcat{padding:18px;cursor:pointer;transition:.2s;text-align:left;color:var(--text);font-family:inherit}
+.fcat:hover{transform:translateY(-3px);border-color:rgba(184,255,60,.5);background:var(--card2)}
+.fcat .tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:7px;background:rgba(77,163,255,.15);color:var(--blue)}
+.fcat .tag.ss{background:rgba(255,201,64,.15);color:var(--gold)}
+.fcat .tag.era{background:rgba(190,120,255,.16);color:#c79bff}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.filters button{background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);font:700 13px Inter,sans-serif;padding:9px 14px;border-radius:999px;cursor:pointer;transition:.18s}
+.filters button:hover{color:var(--text)}
+.filters button.on{background:var(--text);color:#0a0f1a;border-color:var(--text)}
+.filters button .n{opacity:.6;margin-left:4px}
+.erabadge{display:inline-block;margin-left:8px;vertical-align:middle;font:800 11px Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:7px;background:rgba(190,120,255,.16);color:#c79bff}
+.fcat h4{font-family:"Bebas Neue",sans-serif;font-size:28px;letter-spacing:.5px;margin-top:10px;line-height:1}
+.fcat p{color:var(--muted);font-size:13px;margin-top:6px}
+.fcat .best{margin-top:12px;font-size:12px;color:var(--dim);font-weight:600}
+
+.modal{position:fixed;inset:0;background:rgba(3,6,12,.72);backdrop-filter:blur(6px);display:none;place-items:center;z-index:50;padding:18px}
+.modal.show{display:grid}
+.modal .card{max-width:520px;width:100%;padding:28px;background:#0f182b}
+.modal h3{font-family:"Bebas Neue",sans-serif;font-size:38px;letter-spacing:1px}
+.modal ol{margin:14px 0 18px 20px;color:#c9d2e2;line-height:1.6;font-size:15px}
+.modal ol li{margin-bottom:6px}
+.modal .note{font-size:12px;color:var(--muted);margin-bottom:18px}
+.hidden{display:none!important}
+.newdot{font-size:9px;font-weight:800;letter-spacing:.08em;background:var(--gold);color:#0a0f1a;padding:2px 5px;border-radius:5px;margin-left:4px;vertical-align:2px}
+nav button.on .newdot{background:#0a0f1a;color:var(--gold)}
+.film{padding:24px}
+.fhead{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.fhead h3{font-family:"Bebas Neue",sans-serif;font-size:40px;letter-spacing:1px;line-height:1}
+.fhead p{color:var(--muted);font-size:14px;margin-top:4px}
+.dots{display:flex;gap:8px}
+.dot{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:13px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--dim)}
+.dot.cur{border-color:var(--lime);color:var(--text)}
+.dot.won{background:var(--lime);color:#0a0f1a;border-color:var(--lime)}
+.dot.lost{background:rgba(255,77,94,.2);border-color:var(--red);color:var(--red)}
+.potbar{margin:20px 0 6px;display:flex;align-items:center;gap:14px}
+.pot{font-family:"Bebas Neue",sans-serif;font-size:56px;line-height:.9;color:var(--lime);min-width:100px}
+.potinfo{flex:1}
+.potinfo .l{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.meter{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.meter i{height:8px;border-radius:5px;background:rgba(255,255,255,.08);transition:.3s}
+.meter i.on{background:linear-gradient(90deg,var(--lime),var(--lime2))}
+.clues{display:grid;gap:10px;margin:18px 0 6px;counter-reset:c}
+.clue{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--line);animation:slidein .45s cubic-bezier(.2,.8,.2,1)}
+.clue .n{flex:none;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-weight:800;font-size:13px;background:rgba(255,255,255,.08)}
+.clue .t{font-size:15.5px;line-height:1.45;padding-top:3px}
+.clue.latest{border-color:rgba(184,255,60,.45);background:rgba(184,255,60,.06)}
+.clue.latest .n{background:var(--lime);color:#0a0f1a}
+.clue.locked{opacity:.4;animation:none}
+.clue.locked .t{filter:blur(5px);user-select:none}
+@keyframes slidein{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.reveal{display:none;margin-top:18px;padding:20px;border-radius:16px;text-align:center;border:1px solid var(--line);background:rgba(0,0,0,.28)}
+.reveal.show{display:block;animation:slidein .4s}
+.reveal .who{font-family:"Bebas Neue",sans-serif;font-size:46px;letter-spacing:1px;line-height:1;margin:6px 0}
+.reveal.win .who{color:var(--lime)} .reveal.loss .who{color:var(--text)}
+.reveal .actions{justify-content:center;margin-top:14px}
+.frow{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:12px}
+footer{text-align:center;color:var(--dim);font-size:12px;margin-top:30px;line-height:1.6}
+@media (max-width:640px){
+  .brand h1{font-size:32px}.hero h2{font-size:36px}.cat h3{font-size:32px}
+  .board{grid-template-columns:repeat(2,1fr)} .tile{height:62px}
+  .back .nm{font-size:13px}.statsgrid{grid-template-columns:repeat(2,1fr)}
+  .summary .big{font-size:72px}
+  .inputrow{flex-direction:column}.inputrow .btn{padding:14px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0a0f1a" stroke-width="2.2" stroke-linecap="round"><ellipse cx="12" cy="12" rx="10" ry="6" transform="rotate(-35 12 12)"/><path d="M9 15l6-6M10.5 10.5l1.2 1.2M12.3 8.7l1.2 1.2M8.7 12.3l1.2 1.2"/></svg>
+      </div>
+      <div><h1>DEEP<span>BALL</span></h1><small>Daily NFL ranking trivia</small></div>
+    </div>
+    <nav>
+      <button data-view="daily" class="on">Daily</button>
+      <button data-view="free">Free Play</button>
+      <button data-view="film">Film Room <span class="newdot">NEW</span></button>
+      <button id="howBtn">How to play</button>
+    </nav>
+  </header>
+
+  <!-- DAILY / GAME VIEW -->
+  <section id="viewGame">
+    <div class="card hero">
+      <div>
+        <div class="eyebrow" id="heroEyebrow">Daily Board</div>
+        <h2 id="heroTitle">Today's Board</h2>
+        <p id="heroSub"></p>
+      </div>
+      <div class="roundchips" id="chips"></div>
+    </div>
+
+    <div class="card game" id="gameCard">
+      <div class="ghead">
+        <div class="cat"><h3 id="catTitle"></h3><p id="catSub"></p></div>
+        <div class="scorebox">
+          <div class="stat"><div class="v" id="roundPts">0</div><div class="l">Round pts</div></div>
+          <div class="stat"><div class="strikes" id="strikes"></div><div class="l">Strikes</div></div>
+          <div class="stat"><div class="v" id="foundCt">0/0</div><div class="l">Found</div></div>
+        </div>
+      </div>
+      <form class="inputrow" id="guessForm" autocomplete="off">
+        <div class="acwrap">
+          <input id="guess" placeholder="Start typing a player…" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="ac" aria-expanded="false">
+          <div class="ac" id="ac" role="listbox"></div>
+        </div>
+        <button class="btn primary" type="submit">Guess</button>
+      </form>
+      <div class="feedback" id="feedback"></div>
+      <div class="board" id="board"></div>
+      <div class="endbar" id="endbar">
+        <div class="msg" id="endMsg"></div>
+        <div class="actions" id="endActions"></div>
+      </div>
+      <div class="under">
+        <span id="dataNote">Stats through the 2025 NFL season · ~ marks an approximate figure</span>
+        <button class="linkish" id="giveUp">Give up this round</button>
+      </div>
+    </div>
+
+    <div class="card summary hidden" id="summary">
+      <div class="eyebrow" id="sumEyebrow">Daily complete</div>
+      <div class="big" id="sumScore">0</div>
+      <div style="color:var(--muted);font-weight:600;margin-top:4px">total points</div>
+      <div class="rows" id="sumRows"></div>
+      <div class="statsgrid" id="statsGrid"></div>
+      <div class="actions" style="justify-content:center">
+        <button class="btn primary" style="padding:14px 22px" id="shareBtn">Copy results</button>
+        <button class="btn ghost" id="reviewBtn">Review boards</button>
+        <button class="btn ghost" id="toFree">Free Play</button>
+      </div>
+      <textarea class="sharebox" id="shareBox" readonly></textarea>
+      <div class="countdown">Next board in <b id="countdown" class="cdown">--:--:--</b></div>
+    </div>
+  </section>
+
+  <!-- FREE PLAY -->
+  <section id="viewFree" class="hidden">
+    <div class="card hero">
+      <div>
+        <div class="eyebrow">Free Play</div>
+        <h2>Pick any category</h2>
+        <p>Unlimited practice. Same rules — three strikes and you're out.</p>
+      </div>
+      <button class="btn ghost" id="randomBtn">🎲 Random category</button>
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="freegrid" id="freeGrid"></div>
+  </section>
+
+  <!-- FILM ROOM -->
+  <section id="viewFilm" class="hidden">
+    <div class="card hero">
+      <div>
+        <div class="eyebrow" id="filmEyebrow">Film Room · Daily</div>
+        <h2>Who's on the tape?</h2>
+        <p>One mystery offensive star a day — QB, RB, WR or TE. The scouting report starts obscure and gets easier; name him early for more points. A wrong guess unlocks the next clue.</p>
+      </div>
+      <div class="dots" id="filmDots"></div>
+    </div>
+    <div class="card film" id="filmCard">
+      <div class="fhead">
+        <div><h3 id="filmTitle">Player 1 of 5</h3><p id="filmSub">Scouting report</p></div>
+        <div class="stat"><div class="v" id="filmTotal">0</div><div class="l">Total pts</div></div>
+      </div>
+      <div class="potbar">
+        <div class="pot" id="filmPot">100</div>
+        <div class="potinfo"><div class="l">Points on the table</div><div class="meter" id="filmMeter"></div></div>
+      </div>
+      <div class="clues" id="filmClues"></div>
+      <form class="inputrow" id="filmForm" autocomplete="off">
+        <div class="acwrap">
+          <input id="filmGuess" placeholder="Who is it? Start typing…" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="filmAc" aria-expanded="false">
+          <div class="ac" id="filmAc" role="listbox"></div>
+        </div>
+        <button class="btn primary" type="submit">Guess</button>
+      </form>
+      <div class="frow">
+        <div class="feedback" id="filmFb"></div>
+        <button class="btn ghost" id="filmNext" type="button">Next clue (−20)</button>
+      </div>
+      <div class="reveal" id="filmReveal"></div>
+    </div>
+    <div class="card summary hidden" id="filmSummary">
+      <div class="eyebrow" id="fsEyebrow">Film Room complete</div>
+      <div class="big" id="fsScore">0</div>
+      <div style="color:var(--muted);font-weight:600;margin-top:4px">out of 500</div>
+      <div class="rows" id="fsRows"></div>
+      <div class="actions" style="justify-content:center">
+        <button class="btn primary" style="padding:14px 22px" id="fsShare">Copy results</button>
+        <button class="btn ghost" id="fsPractice">Practice round</button>
+      </div>
+      <textarea class="sharebox" id="fsShareBox" readonly></textarea>
+      <div class="countdown">New tape in <b class="cdown">--:--:--</b></div>
+    </div>
+  </section>
+
+  <footer>Deep Ball is a fan-made game, not affiliated with the NFL or Jomboy Media.<br>A new three-category board drops every day at midnight Eastern.</footer>
+</div>
+
+<div class="modal" id="howModal">
+  <div class="card">
+    <h3>How to play</h3>
+    <ol>
+      <li>Each round gives you an NFL stat leaderboard — like <b>career rushing yards</b>.</li>
+      <li>Name players who are on it. Every correct name flips its tile.</li>
+      <li><b>Deeper = more points.</b> Your points equal the player's rank: #1 is worth 1, #20 is worth 20.</li>
+      <li>Name someone who isn't on the list and that's a strike. <b>Three strikes</b> ends the round.</li>
+      <li>The Daily board has <b>three categories</b>, always including one <b>era</b> challenge (like the 1990s or 2010s), and resets at midnight ET. Free Play is unlimited.</li>
+    </ol>
+    <p class="note">Last names work when they're unique on the board (e.g. "Dickerson"). Small typos are forgiven.</p>
+    <button class="btn primary" style="padding:14px 22px;width:100%" id="closeHow">Let's go</button>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============
+   Each entry: [name, displayValue, [aliases]]
+   Lists are in rank order. Stats through the 2025 season; "~" = approximate. */
+const CATS = [
+ {id:"rushyds",tag:"Career",title:"Career Rushing Yards",sub:"All-time regular-season leaders",list:[
+  ["Emmitt Smith","18,355"],["Walter Payton","16,726",["Sweetness"]],["Frank Gore","16,000"],["Barry Sanders","15,269"],["Adrian Peterson","14,918",["AP","All Day"]],
+  ["Curtis Martin","14,101"],["LaDainian Tomlinson","13,684"],["Jerome Bettis","13,662",["The Bus"]],["Eric Dickerson","13,259"],["Derrick Henry","~13,000",["King Henry"]],
+  ["Tony Dorsett","12,739"],["Jim Brown","12,312"],["Marshall Faulk","12,279"],["Edgerrin James","12,246",["Edge"]],["Marcus Allen","12,243"],
+  ["Franco Harris","12,120"],["Thurman Thomas","12,074"],["Fred Taylor","11,695"],["Steven Jackson","11,438"],["John Riggins","11,352"],
+  ["Corey Dillon","11,241"],["O.J. Simpson","11,236",["OJ"]],["LeSean McCoy","11,102",["Shady McCoy"]],["Warrick Dunn","10,967"],["Ricky Watters","10,643"]]},
+ {id:"passyds",tag:"Career",title:"Career Passing Yards",sub:"All-time regular-season leaders",list:[
+  ["Tom Brady","89,214"],["Drew Brees","80,358"],["Peyton Manning","71,940"],["Brett Favre","71,838"],["Aaron Rodgers","~66,200"],
+  ["Matthew Stafford","~64,500",["Matt Stafford"]],["Ben Roethlisberger","64,088",["Big Ben"]],["Philip Rivers","~63,900"],["Matt Ryan","62,792",["Matty Ice"]],["Dan Marino","61,361"],
+  ["Eli Manning","57,023"],["John Elway","51,475"],["Warren Moon","49,325"]]},
+ {id:"passtd",tag:"Career",title:"Career Passing Touchdowns",sub:"All-time regular-season leaders",list:[
+  ["Tom Brady","649"],["Drew Brees","571"],["Peyton Manning","539"],["Brett Favre","508"],["Aaron Rodgers","~499"],
+  ["Matthew Stafford","~447",["Matt Stafford"]],["Philip Rivers","~425"],["Dan Marino","420"],["Ben Roethlisberger","418",["Big Ben"]],["Matt Ryan","381"],
+  ["Eli Manning","366"],["Russell Wilson","~351"],["Fran Tarkenton","342"]]},
+ {id:"recyds",tag:"Career",title:"Career Receiving Yards",sub:"All-time regular-season leaders",list:[
+  ["Jerry Rice","22,895"],["Larry Fitzgerald","17,492"],["Terrell Owens","15,934",["TO","T.O."]],["Randy Moss","15,292"],["Isaac Bruce","15,208"],
+  ["Tony Gonzalez","15,127"],["Tim Brown","14,934"],["Steve Smith Sr.","14,731",["Steve Smith"]],["Marvin Harrison","14,580"],["Reggie Wayne","14,345"],
+  ["Andre Johnson","14,185"],["James Lofton","14,004"],["Cris Carter","13,899"],["Anquan Boldin","13,779"],["Henry Ellard","13,777"],
+  ["Julio Jones","13,703"],["Torry Holt","13,382"]]},
+ {id:"rectd",tag:"Career",title:"Career Receiving Touchdowns",sub:"All-time regular-season leaders",list:[
+  ["Jerry Rice","197"],["Randy Moss","156"],["Terrell Owens","153",["TO","T.O."]],["Cris Carter","130"],["Marvin Harrison","128"],
+  ["Larry Fitzgerald","121"],["Davante Adams","~117"],["Antonio Gates","116"],["Tony Gonzalez","111"],["Mike Evans","~108"],
+  ["Steve Largent","100"],["Tim Brown","100"],["Don Hutson","99"],["Rob Gronkowski","92",["Gronk"]],["Isaac Bruce","91"]]},
+ {id:"rushtd",tag:"Career",title:"Career Rushing Touchdowns",sub:"All-time regular-season leaders",list:[
+  ["Emmitt Smith","164"],["LaDainian Tomlinson","145"],["Marcus Allen","123"],["Derrick Henry","~122",["King Henry"]],["Adrian Peterson","120",["AP"]],
+  ["Walter Payton","110"],["Jim Brown","106"],["John Riggins","104"],["Marshall Faulk","100"],["Shaun Alexander","100"],
+  ["Barry Sanders","99"],["Franco Harris","91"],["Jerome Bettis","91",["The Bus"]],["Eric Dickerson","90"],["Curtis Martin","90"],
+  ["Priest Holmes","86"],["Marshawn Lynch","85",["Beast Mode"]],["Jim Taylor","83"],["Corey Dillon","82"],["Frank Gore","81"]]},
+ {id:"sacks",tag:"Career",title:"Career Sacks",sub:"Official leaders since 1982",list:[
+  ["Bruce Smith","200"],["Reggie White","198",["Minister of Defense"]],["Kevin Greene","160"],["Julius Peppers","159.5"],["Chris Doleman","150.5"],
+  ["Michael Strahan","141.5"],["Jason Taylor","139.5"],["Terrell Suggs","139"],["DeMarcus Ware","138.5"],["John Randle","137.5"],
+  ["Richard Dent","137.5"],["Jared Allen","136"],["John Abraham","133.5"],["Lawrence Taylor","132.5",["LT"]],["Leslie O'Neal","132.5"],
+  ["Von Miller","~132.5"],["Cameron Jordan","~132",["Cam Jordan"]],["Rickey Jackson","128"],["Derrick Thomas","126.5"],["Dwight Freeney","125.5"]]},
+ {id:"ints",tag:"Career",title:"Career Interceptions",sub:"All-time regular-season leaders",list:[
+  ["Paul Krause","81"],["Emlen Tunnell","79"],["Rod Woodson","71"],["Dick Lane","68",["Night Train Lane","Night Train"]],["Charles Woodson","65"],
+  ["Ken Riley","65"],["Ed Reed","64"],["Ronnie Lott","63"],["Darren Sharper","63"],["Dick LeBeau","62"],
+  ["Dave Brown","62"],["Emmitt Thomas","58"],["Mel Blount","57"],["Bobby Boyd","57"],["Johnny Robinson","57"],
+  ["Eugene Robinson","57"],["Everson Walls","57"],["Pat Fischer","56"],["Aeneas Williams","55"],["Darrell Green","54"],["Eric Allen","54"]]},
+ {id:"points",tag:"Career",title:"Career Points Scored",sub:"All-time regular-season leaders",list:[
+  ["Adam Vinatieri","2,673"],["Morten Andersen","2,544"],["Gary Anderson","2,434"],["Jason Hanson","2,150"],["John Carney","2,062"],
+  ["Matt Stover","2,004"],["George Blanda","2,002"],["Jason Elam","1,983"],["Robbie Gould","1,961"],["Mason Crosby","1,918"],
+  ["Stephen Gostkowski","1,875"],["Phil Dawson","1,847"]]},
+ {id:"ssrush",tag:"Single season",title:"Single Season Rushing Yards",sub:"Each player's best season counts once",list:[
+  ["Eric Dickerson","2,105 (1984)"],["Adrian Peterson","2,097 (2012)",["AP"]],["Jamal Lewis","2,066 (2003)"],["Barry Sanders","2,053 (1997)"],["Derrick Henry","2,027 (2020)"],
+  ["Terrell Davis","2,008 (1998)"],["Chris Johnson","2,006 (2009)",["CJ2K"]],["Saquon Barkley","2,005 (2024)"],["O.J. Simpson","2,003 (1973)",["OJ"]],["Earl Campbell","1,934 (1980)"],
+  ["Ahman Green","1,883 (2003)"],["Shaun Alexander","1,880 (2005)"],["Jim Brown","1,863 (1963)"],["Tiki Barber","1,860 (2005)"],["Ricky Williams","1,853 (2002)"],
+  ["Walter Payton","1,852 (1977)"],["DeMarco Murray","1,845 (2014)"],["LaDainian Tomlinson","1,815 (2006)"],["Jonathan Taylor","1,811 (2021)"],["Larry Johnson","1,789 (2006)"],
+  ["Emmitt Smith","1,773 (1995)"]]},
+ {id:"ssrec",tag:"Single season",title:"Single Season Receiving Yards",sub:"Each player's best season counts once",list:[
+  ["Calvin Johnson","1,964 (2012)",["Megatron"]],["Cooper Kupp","1,947 (2021)"],["Julio Jones","1,871 (2015)"],["Jerry Rice","1,848 (1995)"],["Antonio Brown","1,834 (2015)"],
+  ["Justin Jefferson","1,809 (2022)"],["Tyreek Hill","1,799 (2023)"],["Jaxon Smith-Njigba","~1,790 (2025)",["JSN"]],["Isaac Bruce","1,781 (1995)"],["CeeDee Lamb","1,749 (2023)"],
+  ["Charley Hennigan","1,746 (1961)"],["Marvin Harrison","1,722 (2002)"],["Puka Nacua","~1,715 (2025)"],["Ja'Marr Chase","1,708 (2024)"],["Torry Holt","1,696 (2003)"],
+  ["Herman Moore","1,686 (1995)"],["Josh Gordon","1,646 (2013)"],["Demaryius Thomas","1,619 (2014)"],["Michael Irvin","1,603 (1995)"],["Lance Alworth","1,602 (1965)"]]},
+ {id:"sspass",tag:"Single season",title:"Single Season Passing Yards",sub:"Each player's best season counts once",list:[
+  ["Peyton Manning","5,477 (2013)"],["Drew Brees","5,476 (2011)"],["Tom Brady","5,316 (2021)"],["Patrick Mahomes","5,250 (2022)"],["Ben Roethlisberger","5,129 (2018)",["Big Ben"]],
+  ["Jameis Winston","5,109 (2019)"],["Dan Marino","5,084 (1984)"],["Matthew Stafford","5,038 (2011)",["Matt Stafford"]],["Justin Herbert","5,014 (2021)"],["Matt Ryan","4,944 (2016)"],
+  ["Eli Manning","4,933 (2011)"],["Joe Burrow","4,918 (2024)"],["Kirk Cousins","4,917 (2016)"],["Tony Romo","4,903 (2012)"],["Dak Prescott","4,902 (2019)"]]},
+ {id:"sstd",tag:"Single season",title:"Single Season Passing TDs",sub:"Each player's best season counts once",list:[
+  ["Peyton Manning","55 (2013)"],["Patrick Mahomes","50 (2018)"],["Tom Brady","50 (2007)"],["Aaron Rodgers","48 (2020)"],["Dan Marino","48 (1984)"],
+  ["Drew Brees","46 (2011)"],["Matthew Stafford","~46 (2025)",["Matt Stafford"]],["Joe Burrow","43 (2024)"],["Kurt Warner","41 (1999)"],["Lamar Jackson","41 (2024)"],
+  ["Andrew Luck","40 (2014)"],["Russell Wilson","40 (2020)"],["Daunte Culpepper","39 (2004)"],["Brett Favre","39 (1996)"],["Matt Ryan","38 (2016)"],
+  ["Josh Allen","37 (2020)"],["Jared Goff","37 (2024)"]]},
+ {id:"sssack",tag:"Single season",title:"Single Season Sacks",sub:"Official since 1982 · best season counts once",list:[
+  ["Myles Garrett","~23 (2025)"],["Michael Strahan","22.5 (2001)"],["T.J. Watt","22.5 (2021)"],["Jared Allen","22 (2011)"],["Mark Gastineau","22 (1984)"],
+  ["Justin Houston","22 (2014)"],["Reggie White","21 (1987)"],["Chris Doleman","21 (1989)"],["Lawrence Taylor","20.5 (1986)",["LT"]],["J.J. Watt","20.5 (2012)"],
+  ["Aaron Donald","20.5 (2018)"],["DeMarcus Ware","20 (2008)"],["Derrick Thomas","20 (1990)"],["Bruce Smith","19 (1990)"],["Clyde Simmons","19 (1992)"],
+  ["Jason Taylor","18.5 (2002)"],["Andre Tippett","18.5 (1984)"]]},
+ {id:"ssrtd",tag:"Single season",title:"Single Season Rushing TDs",sub:"Each player's best season counts once",list:[
+  ["LaDainian Tomlinson","28 (2006)"],["Shaun Alexander","27 (2005)"],["Priest Holmes","27 (2003)"],["Emmitt Smith","25 (1995)"],["John Riggins","24 (1983)"],
+  ["Joe Morris","21 (1985)"],["Terry Allen","21 (1996)"],["Terrell Davis","21 (1998)"],["Larry Johnson","20 (2005)"],["Jim Taylor","19 (1962)"],
+  ["Earl Campbell","19 (1979)"],["Chuck Muncie","19 (1981)"],["Marshall Faulk","18 (2000)"],["Adrian Peterson","18 (2009)",["AP"]],["Jonathan Taylor","18 (2021)"]]},
+
+ /* ---------- ERAS (regular season totals within the decade) ---------- */
+ {id:"e10pass",tag:"Era",era:"2010s",title:"Passing Yards: 2010s",sub:"Most passing yards, 2010–2019",list:[
+  ["Drew Brees","~46,800"],["Matt Ryan","~44,800",["Matty Ice"]],["Philip Rivers","~44,300"],["Tom Brady","~43,700"],["Matthew Stafford","~38,800",["Matt Stafford"]],
+  ["Eli Manning","~38,400"],["Aaron Rodgers","~38,100"],["Ben Roethlisberger","~37,200",["Big Ben"]],["Joe Flacco","~33,400"],["Andy Dalton","~31,600"],
+  ["Russell Wilson","~29,700"],["Cam Newton","~29,000"]]},
+ {id:"e10ptd",tag:"Era",era:"2010s",title:"Passing TDs: 2010s",sub:"Most passing touchdowns, 2010–2019",list:[
+  ["Drew Brees","~345"],["Tom Brady","~316"],["Aaron Rodgers","~305"],["Philip Rivers","~288"],["Matt Ryan","~283",["Matty Ice"]],
+  ["Matthew Stafford","~243",["Matt Stafford"]],["Eli Manning","~241"],["Ben Roethlisberger","~236",["Big Ben"]],["Russell Wilson","~227"],["Andy Dalton","~204"]]},
+ {id:"e10rush",tag:"Era",era:"2010s",title:"Rushing Yards: 2010s",sub:"Most rushing yards, 2010–2019",list:[
+  ["LeSean McCoy","~10,400",["Shady McCoy"]],["Frank Gore","~9,800"],["Adrian Peterson","~9,700",["AP"]],["Matt Forte","~7,600"],["Marshawn Lynch","~7,400",["Beast Mode"]],
+  ["Mark Ingram","~7,000"],["DeMarco Murray","~6,700"],["Chris Johnson","~6,300",["CJ2K"]],["Arian Foster","~6,200"],["Le'Veon Bell","~6,100"],
+  ["Jamaal Charles","~6,100"]]},
+ {id:"e10rec",tag:"Era",era:"2010s",title:"Receiving Yards: 2010s",sub:"Most receiving yards, 2010–2019",list:[
+  ["Julio Jones","~12,100"],["Antonio Brown","~11,200",["AB"]],["Larry Fitzgerald","~10,000"],["Demaryius Thomas","~9,800"],["A.J. Green","~8,900"],
+  ["DeAndre Hopkins","~8,600",["Nuk"]],["T.Y. Hilton","~8,600"],["Calvin Johnson","~8,500",["Megatron"]],["Brandon Marshall","~8,200"],["Jordy Nelson","~7,900"],
+  ["Rob Gronkowski","~7,900",["Gronk"]],["Dez Bryant","~7,500"]]},
+ {id:"e10sack",tag:"Era",era:"2010s",title:"Sacks: 2010s",sub:"Most sacks, 2010–2019",list:[
+  ["Von Miller","~106"],["Chandler Jones","~96"],["J.J. Watt","~96"],["Cameron Wake","~95"],["Ryan Kerrigan","~90"],
+  ["Justin Houston","~89.5"],["Cameron Jordan","~87.5",["Cam Jordan"]],["Calais Campbell","~81"],["Terrell Suggs","~80.5"],["Robert Quinn","~77"]]},
+ {id:"e90rush",tag:"Era",era:"1990s",title:"Rushing Yards: 1990s",sub:"Most rushing yards, 1990–1999",list:[
+  ["Emmitt Smith","~13,960"],["Barry Sanders","~13,800"],["Thurman Thomas","~9,800"],["Ricky Watters","~8,800"],["Jerome Bettis","~8,460",["The Bus"]],
+  ["Terry Allen","~7,800"],["Chris Warren","~7,400"],["Rodney Hampton","~6,900"],["Marshall Faulk","~6,700"],["Terrell Davis","~6,600"]]},
+ {id:"e90rec",tag:"Era",era:"1990s",title:"Receiving Yards: 1990s",sub:"Most receiving yards, 1990–1999",list:[
+  ["Jerry Rice","~12,100"],["Michael Irvin","~10,900",["The Playmaker"]],["Cris Carter","~10,200"],["Tim Brown","~10,200"],["Irving Fryar","~9,100"],
+  ["Andre Rison","~9,000"],["Andre Reed","~8,700"],["Herman Moore","~8,700"],["Henry Ellard","~7,900"]]},
+ {id:"e90ptd",tag:"Era",era:"1990s",title:"Passing TDs: 1990s",sub:"Most passing touchdowns, 1990–1999",list:[
+  ["Brett Favre","~235"],["Steve Young","~209"],["Dan Marino","~200"],["Warren Moon","~194"],["John Elway","~180"],
+  ["Jim Kelly","~156"],["Troy Aikman","~149"],["Drew Bledsoe","~147"]]}
+];
+
+/* ============ FILM ROOM: mystery player files (clues go from hardest to easiest) ============ */
+const FILM = [
+ /* ---------- QUARTERBACKS ---------- */
+ {name:"Patrick Mahomes",pos:"QB",clues:["His father pitched in Major League Baseball.","Played college football at Texas Tech.","Drafted 10th overall in 2017 after his team traded up.","Threw 50 touchdown passes in his first full season as a starter.","Three-time Super Bowl MVP for the Kansas City Chiefs."]},
+ {name:"Josh Allen",pos:"QB",clues:["Grew up on a farm in Firebaugh, California.","Started at Reedley junior college before transferring to Wyoming.","Drafted seventh overall in 2018.","Won NFL MVP for the 2024 season.","The Buffalo Bills' franchise quarterback."]},
+ {name:"Lamar Jackson",pos:"QB",clues:["Grew up in Pompano Beach, Florida.","Won the 2016 Heisman Trophy at Louisville.","The final pick of the first round in 2018.","Won NFL MVP unanimously in 2019.","The Ravens' electric two-time MVP quarterback."]},
+ {name:"Joe Burrow",pos:"QB",clues:["Grew up in Athens, Ohio.","Began his college career as a backup at Ohio State.","Threw 60 touchdown passes and won a national title and the Heisman in 2019.","The first overall pick of the 2020 draft.","The Bengals quarterback who led Cincinnati to Super Bowl LVI."]},
+ {name:"Jalen Hurts",pos:"QB",clues:["His father was his high school head coach in Channelview, Texas.","Was benched at halftime of a national title game as a sophomore.","Transferred and finished Heisman runner-up at Oklahoma in 2019.","A second-round pick in 2020.","The Eagles quarterback and Super Bowl LIX MVP."]},
+ {name:"C.J. Stroud",pos:"QB",aliases:["CJ Stroud"],clues:["Grew up in Rancho Cucamonga, California.","A two-time Heisman finalist at Ohio State.","Drafted second overall in 2023.","Named 2023 Offensive Rookie of the Year.","The Houston Texans' franchise quarterback."]},
+ {name:"Jayden Daniels",pos:"QB",clues:["Grew up in San Bernardino, California.","Started his college career at Arizona State.","Won the 2023 Heisman Trophy at LSU.","Drafted second overall in 2024 and named Offensive Rookie of the Year.","The Commanders QB who beat the Bears on a Hail Mary as a rookie."]},
+ {name:"Caleb Williams",pos:"QB",clues:["A Washington, D.C. native who starred at Gonzaga College High School.","Started his college career at Oklahoma.","Followed his coach to USC and won the 2022 Heisman Trophy.","The first overall pick of the 2024 draft.","The Chicago Bears' franchise quarterback."]},
+ {name:"Drake Maye",pos:"QB",clues:["His father played quarterback at North Carolina.","Flipped his commitment from Alabama to North Carolina.","Drafted third overall in 2024.","Took over as a rookie starter for a franchise still rebuilding after Tom Brady.","The New England Patriots' young franchise quarterback."]},
+ {name:"Bo Nix",pos:"QB",clues:["His father was once Auburn's starting quarterback.","Started three seasons at Auburn.","Transferred to Oregon and set an FBS single-season completion percentage record.","Drafted 12th overall in 2024.","The Denver Broncos quarterback under Sean Payton."]},
+ {name:"Justin Herbert",pos:"QB",clues:["A Eugene, Oregon native who stayed home to play for the Ducks.","An Academic All-American who majored in biology.","Drafted sixth overall in 2020.","Became the starter after a team doctor accidentally punctured Tyrod Taylor's lung.","The Los Angeles Chargers' strong-armed quarterback."]},
+ {name:"Jared Goff",pos:"QB",clues:["His father was a big-league catcher.","Played college football at Cal.","The first overall pick of the 2016 draft.","Was traded for Matthew Stafford.","The Detroit Lions' quarterback."]},
+ {name:"Baker Mayfield",pos:"QB",clues:["Walked on at Texas Tech — then walked on again at Oklahoma.","Won the 2017 Heisman Trophy.","The first overall pick of the 2018 draft.","Played for three different teams in 2022 and 2023.","Revived his career as the Tampa Bay Buccaneers' quarterback."]},
+ {name:"Dak Prescott",pos:"QB",clues:["Grew up in Sulphur, Louisiana.","Played college football at Mississippi State.","A fourth-round pick in 2016.","Won Offensive Rookie of the Year after Tony Romo got hurt in the preseason.","The Dallas Cowboys' quarterback."]},
+ {name:"Brock Purdy",pos:"QB",clues:["Played high school football in the Phoenix suburbs.","A four-year starter at Iowa State.","The very last pick of the 2022 draft — \"Mr. Irrelevant.\"","Started Super Bowl LVIII.","The San Francisco 49ers' quarterback."]},
+ {name:"Trevor Lawrence",pos:"QB",clues:["Grew up in Cartersville, Georgia.","Won a national championship as a true freshman.","Starred at Clemson.","The first overall pick of the 2021 draft.","The Jacksonville Jaguars' franchise quarterback."]},
+ {name:"Cam Ward",pos:"QB",clues:["A zero-star recruit out of West Columbia, Texas.","Began his college career at FCS Incarnate Word.","Played at Washington State, then Miami.","Set the FBS career record for touchdown passes.","The first overall pick of the 2025 draft, by Tennessee."]},
+
+ /* ---------- RUNNING BACKS ---------- */
+ {name:"Christian McCaffrey",pos:"RB",aliases:["CMC"],clues:["His father won three Super Bowls as a wide receiver.","Finished Heisman runner-up at Stanford in 2015.","Drafted eighth overall in 2017 by Carolina.","Joined the 1,000 rushing / 1,000 receiving club in 2019.","The 49ers' do-everything back and 2023 Offensive Player of the Year."]},
+ {name:"Saquon Barkley",pos:"RB",clues:["Born in the Bronx.","Starred at Penn State.","The second overall pick in 2018 and Offensive Rookie of the Year.","Left the Giants for a division rival in free agency.","Ran for 2,005 yards in 2024 and pulled off a backward hurdle."]},
+ {name:"Derrick Henry",pos:"RB",aliases:["King Henry"],clues:["Set the national high school career rushing record in Yulee, Florida.","Won the 2015 Heisman Trophy at Alabama.","Ran for 2,027 yards in 2020.","Famously stiff-armed Josh Norman to the turf.","\"King Henry\" — starred for the Titans, then the Ravens."]},
+ {name:"Bijan Robinson",pos:"RB",clues:["Grew up in Tucson, Arizona.","Won the Doak Walker Award at Texas.","Drafted eighth overall in 2023 — a rare top-10 running back.","A dual threat who lines up all over the formation.","The Atlanta Falcons' star running back."]},
+ {name:"Jahmyr Gibbs",pos:"RB",clues:["Grew up in Dalton, Georgia.","Started his college career at Georgia Tech.","Transferred to Alabama for his final season.","Drafted 12th overall in 2023.","The Lions' speedster — half of \"Sonic and Knuckles.\""]},
+ {name:"Jonathan Taylor",pos:"RB",aliases:["JT"],clues:["Grew up in Salem, New Jersey.","Ran for more than 6,000 yards in three seasons at Wisconsin.","A second-round pick in 2020.","Led the NFL with 1,811 rushing yards in 2021.","The Indianapolis Colts' workhorse back."]},
+ {name:"De'Von Achane",pos:"RB",aliases:["Devon Achane"],clues:["Also a sprinter on the track team in college.","Played college football at Texas A&M.","A third-round pick in 2023.","Scored four touchdowns in a 70-point rout of Denver as a rookie.","The Miami Dolphins' lightning-fast running back."]},
+ {name:"Ashton Jeanty",pos:"RB",clues:["Played high school football in Frisco, Texas.","Starred at Boise State.","Ran for 2,601 yards in 2024 — second-most in FBS history.","Finished Heisman runner-up, then went sixth overall in the 2025 draft.","The Las Vegas Raiders' running back."]},
+ {name:"James Cook",pos:"RB",clues:["Grew up in Miami.","Won a national title at Georgia.","A second-round pick in 2022.","His older brother is also a Pro Bowl running back.","The Buffalo Bills' running back."]},
+ {name:"Josh Jacobs",pos:"RB",clues:["Spent part of his childhood homeless in Tulsa, Oklahoma.","Rarely a full-time starter in college at Alabama.","Drafted 24th overall in 2019 by the Raiders.","Led the NFL with 1,653 rushing yards in 2022.","Signed with the Green Bay Packers in 2024."]},
+
+ /* ---------- WIDE RECEIVERS ---------- */
+ {name:"Ja'Marr Chase",pos:"WR",aliases:["Jamarr Chase"],clues:["Grew up in Harvey, Louisiana.","Won the Biletnikoff Award in 2019 on a national title team.","Opted out of the 2020 college season.","Drafted fifth overall in 2021 to reunite with his college QB.","The Bengals receiver who won the 2024 receiving triple crown."]},
+ {name:"Justin Jefferson",pos:"WR",aliases:["JJettas"],clues:["From St. Rose, Louisiana.","Won a national title at LSU in 2019.","Drafted 22nd overall with a pick from the Stefon Diggs trade.","Made the \"Griddy\" famous on NFL Sundays.","The Vikings receiver who put up 1,809 yards in 2022."]},
+ {name:"CeeDee Lamb",pos:"WR",clues:["Grew up in Opelousas, Louisiana.","Caught passes from three different Heisman finalists in college.","Starred at Oklahoma.","Drafted 17th overall in 2020.","The Dallas Cowboys' No. 88."]},
+ {name:"Puka Nacua",pos:"WR",clues:["Grew up in Utah.","Started college at Washington before transferring to BYU.","A fifth-round pick in 2023.","Set NFL rookie records for catches and receiving yards.","The Los Angeles Rams' breakout receiver."]},
+ {name:"Amon-Ra St. Brown",pos:"WR",aliases:["Amon Ra St Brown","Sun God"],clues:["His father was a champion bodybuilder.","Played college football at USC.","A fourth-round pick in 2021.","His brother Equanimeous is also an NFL receiver.","The Detroit Lions' star wideout."]},
+ {name:"Jaxon Smith-Njigba",pos:"WR",aliases:["JSN","Jaxon Smith Njigba"],clues:["Grew up in Rockwall, Texas.","Set a Rose Bowl record with 347 receiving yards.","Played at Ohio State alongside two other first-round receivers.","Drafted 20th overall in 2023.","The Seattle Seahawks receiver known as \"JSN.\""]},
+ {name:"Malik Nabers",pos:"WR",clues:["Grew up in Youngsville, Louisiana.","Starred at LSU alongside another first-round receiver.","Drafted sixth overall in 2024.","Set his franchise's rookie record for receptions.","The New York Giants' No. 1 receiver."]},
+ {name:"Brian Thomas Jr.",pos:"WR",aliases:["BTJ","Brian Thomas"],clues:["Also played basketball in high school in Walker, Louisiana.","Led the FBS with 17 receiving touchdowns in 2023.","Played at LSU.","Drafted 23rd overall in 2024.","The Jacksonville Jaguars receiver known as \"BTJ.\""]},
+ {name:"Nico Collins",pos:"WR",clues:["Grew up in Pinson, Alabama.","Played college football at Michigan.","A third-round pick in 2021.","Broke out with nearly 1,300 yards in 2023.","The Houston Texans' top target."]},
+ {name:"Garrett Wilson",pos:"WR",clues:["Grew up in Austin, Texas.","Starred at Ohio State.","Drafted 10th overall in 2022.","Named 2022 Offensive Rookie of the Year.","The New York Jets' No. 1 receiver."]},
+ {name:"Ladd McConkey",pos:"WR",clues:["Grew up in Chatsworth, Georgia.","Won two national titles at Georgia.","An early second-round pick in 2024.","Set his franchise's rookie receiving yards record.","The Los Angeles Chargers' slot star."]},
+ {name:"Drake London",pos:"WR",clues:["Grew up in Moorpark, California.","Also played basketball at USC.","Starred at USC as a receiver.","Drafted eighth overall in 2022.","The Atlanta Falcons' big-bodied receiver."]},
+ {name:"Davante Adams",pos:"WR",clues:["Grew up in East Palo Alto, California.","Played at Fresno State with Derek Carr.","A second-round pick in 2014 by Green Bay.","Reunited with Carr after a trade to Las Vegas.","Has played for the Packers, Raiders, Jets and Rams."]},
+ {name:"Tee Higgins",pos:"WR",clues:["Was Tennessee's Mr. Basketball in high school.","Won a national title at Clemson.","The first pick of the second round in 2020.","Played the 2024 season on the franchise tag.","Ja'Marr Chase's running mate in Cincinnati."]},
+ {name:"Travis Hunter",pos:"WR",clues:["Flipped from Florida State to Jackson State on signing day.","Followed his coach to Colorado.","Won the 2024 Heisman as a two-way star.","Drafted second overall in 2025 after a trade up.","The Jacksonville Jaguars' receiver and cornerback."]},
+
+ /* ---------- TIGHT ENDS ---------- */
+ {name:"George Kittle",pos:"TE",clues:["His father played at Iowa — and so did he.","A fifth-round pick in 2017.","Set a then-record for receiving yards by a tight end in 2018.","A huge pro wrestling fan.","The San Francisco 49ers' tight end."]},
+ {name:"Trey McBride",pos:"TE",clues:["Grew up in Fort Morgan, Colorado.","Won the Mackey Award at Colorado State.","A second-round pick in 2022.","Led all tight ends in receptions in 2024.","The Arizona Cardinals' tight end."]},
+ {name:"Brock Bowers",pos:"TE",clues:["Grew up in Napa, California.","Won two national titles at Georgia.","Drafted 13th overall in 2024.","Set the rookie record for catches by a tight end.","The Las Vegas Raiders' tight end."]},
+ {name:"Sam LaPorta",pos:"TE",clues:["Grew up in Highland, Illinois.","Played college football at Iowa.","A second-round pick in 2023.","Set a rookie tight end receptions record that lasted only one year.","The Detroit Lions' tight end."]}
+];
+
+/* Extra notable players for the autocomplete, so suggestions never give away who's on a board */
+const EXTRA_PLAYERS = `Joe Montana|Steve Young|Johnny Unitas|Bart Starr|Terry Bradshaw|Roger Staubach|Troy Aikman|Jim Kelly|Dan Fouts|Kurt Warner|Joe Namath|Sid Luckman|Otto Graham|Bob Griese|Ken Stabler|Len Dawson|Y.A. Tittle|Sonny Jurgensen|Steve McNair|Donovan McNabb|Michael Vick|Randall Cunningham|Boomer Esiason|Phil Simms|Jim Plunkett|Ken Anderson|Joe Theismann|Mark Brunell|Rich Gannon|Trent Green|Drew Bledsoe|Kerry Collins|Vinny Testaverde|Jake Plummer|Chad Pennington|Carson Palmer|Tony Romo|Jay Cutler|Matt Schaub|Andy Dalton|Alex Smith|Cam Newton|Joe Flacco|Ryan Fitzpatrick|Derek Carr|Kirk Cousins|Jared Goff|Dak Prescott|Josh Allen|Patrick Mahomes|Lamar Jackson|Joe Burrow|Justin Herbert|Jalen Hurts|Tua Tagovailoa|Trevor Lawrence|C.J. Stroud|Brock Purdy|Jordan Love|Baker Mayfield|Sam Darnold|Geno Smith|Caleb Williams|Jayden Daniels|Drake Maye|Bo Nix|Kyler Murray|Deshaun Watson|Daniel Jones|Mac Jones|Zach Wilson|Justin Fields|Bryce Young|Anthony Richardson|Michael Penix Jr.|J.J. McCarthy|Cam Ward|Shedeur Sanders|Jaxson Dart|Teddy Bridgewater|Mitchell Trubisky|Gardner Minshew|Jacoby Brissett|Andrew Luck|Robert Griffin III|Colin Kaepernick|Tim Tebow|Jameis Winston|Marcus Mariota|Blake Bortles|Johnny Manziel|Jim McMahon|Doug Flutie|Bernie Kosar|Gale Sayers|Earl Campbell|Bo Jackson|Terrell Davis|Larry Csonka|Ottis Anderson|Roger Craig|Ricky Williams|Clinton Portis|Priest Holmes|Jamal Lewis|Tiki Barber|Eddie George|Shaun Alexander|Brian Westbrook|Maurice Jones-Drew|Chris Johnson|Ray Rice|Matt Forte|Arian Foster|Jamaal Charles|DeMarco Murray|Le'Veon Bell|Todd Gurley|Ezekiel Elliott|Alvin Kamara|Christian McCaffrey|Dalvin Cook|Nick Chubb|Aaron Jones|Joe Mixon|Josh Jacobs|Saquon Barkley|Jonathan Taylor|Bijan Robinson|Jahmyr Gibbs|Breece Hall|Kyren Williams|James Cook|De'Von Achane|Ashton Jeanty|Kenneth Walker III|Travis Etienne|Rhamondre Stevenson|Najee Harris|Austin Ekeler|Tony Pollard|David Montgomery|Chuba Hubbard|Mark Ingram|Leonard Fournette|Kareem Hunt|Carlos Hyde|Doug Martin|Ahman Green|Willis McGahee|Michael Turner|Rashard Mendenhall|Larry Johnson|Deuce McAllister|Ricky Watters|Jerome Bettis|Thomas Jones|Fred Jackson|Reggie Bush|Darren Sproles|Lenny Moore|Paul Hornung|Hugh McElhenny|Joe Perry|Floyd Little|Earl Campbell|Chuck Muncie|Joe Morris|Terry Allen|William Andrews|Wilbert Montgomery|Billy Sims|George Rogers|Gerald Riggs|Lydell Mitchell|Chuck Foreman|Barry Foster|Robert Smith|Garrison Hearst|Jamal Anderson|Michael Irvin|Lynn Swann|John Stallworth|Steve Largent|Paul Warfield|Lance Alworth|Raymond Berry|Fred Biletnikoff|Art Monk|Charlie Joiner|Drew Pearson|Sterling Sharpe|Shannon Sharpe|Andre Reed|Herman Moore|Rod Smith|Jimmy Smith|Keyshawn Johnson|Hines Ward|Chad Johnson|Derrick Mason|Joey Galloway|Santana Moss|Plaxico Burress|Wes Welker|Calvin Johnson|Roddy White|Vincent Jackson|Brandon Marshall|Dez Bryant|Demaryius Thomas|A.J. Green|Josh Gordon|Antonio Brown|Odell Beckham Jr.|Jarvis Landry|Julian Edelman|Michael Thomas|DeAndre Hopkins|Keenan Allen|Mike Evans|Davante Adams|Tyreek Hill|Stefon Diggs|Adam Thielen|Cooper Kupp|Justin Jefferson|Ja'Marr Chase|CeeDee Lamb|A.J. Brown|Amon-Ra St. Brown|Puka Nacua|Jaxon Smith-Njigba|Garrett Wilson|Chris Olave|Drake London|DK Metcalf|Terry McLaurin|DJ Moore|Deebo Samuel|Brandon Aiyuk|Tee Higgins|Jaylen Waddle|Nico Collins|Malik Nabers|Marvin Harrison Jr.|Brian Thomas Jr.|Ladd McConkey|Rome Odunze|Zay Flowers|George Pickens|Courtland Sutton|Jerry Jeudy|Amari Cooper|Tyler Lockett|Mike Williams|Chris Godwin|Jakobi Meyers|Calvin Ridley|Kellen Winslow|Ozzie Newsome|Mike Ditka|John Mackey|Dave Casper|Jackie Smith|Todd Christensen|Mark Bavaro|Ben Coates|Jason Witten|Antonio Gates|Rob Gronkowski|Travis Kelce|George Kittle|Mark Andrews|Greg Olsen|Jimmy Graham|Vernon Davis|Zach Ertz|Delanie Walker|Heath Miller|Dallas Clark|Kyle Pitts|Sam LaPorta|Brock Bowers|T.J. Hockenson|Trey McBride|Dalton Kincaid|Dallas Goedert|Evan Engram|David Njoku|Deacon Jones|Merlin Olsen|Joe Greene|Alan Page|Jack Youngblood|Randy White|Howie Long|Bruce Matthews|Warren Sapp|Cortez Kennedy|La'Roi Glover|Simeon Rice|Leslie O'Neal|Clyde Simmons|Andre Tippett|Charles Haley|Pat Swilling|Neil Smith|Derrick Thomas|Mark Gastineau|Dwight Freeney|Robert Mathis|Osi Umenyiora|Justin Tuck|Elvis Dumervil|Trent Cole|Mario Williams|Chandler Jones|Khalil Mack|Aaron Donald|J.J. Watt|T.J. Watt|Myles Garrett|Nick Bosa|Joey Bosa|Micah Parsons|Maxx Crosby|Trey Hendrickson|Danielle Hunter|Brian Burns|Josh Allen Jr.|Montez Sweat|Haason Reddick|Za'Darius Smith|Cameron Heyward|Chris Jones|Fletcher Cox|Ndamukong Suh|Calais Campbell|Justin Houston|Von Miller|Jared Allen|Aidan Hutchinson|Will Anderson Jr.|Abdul Carter|Dick Butkus|Ray Nitschke|Jack Lambert|Jack Ham|Mike Singletary|Junior Seau|Derrick Brooks|Ray Lewis|Brian Urlacher|London Fletcher|Zach Thomas|Patrick Willis|Luke Kuechly|Bobby Wagner|Lavonte David|Fred Warner|Roquan Smith|Darius Leonard|Ronnie Lott|Kenny Easley|Steve Atwater|LeRoy Butler|John Lynch|Brian Dawkins|Troy Polamalu|Ed Reed|Bob Sanders|Sean Taylor|Earl Thomas|Kam Chancellor|Eric Berry|Tyrann Mathieu|Harrison Smith|Derwin James|Kyle Hamilton|Minkah Fitzpatrick|Jessie Bates|Antoine Winfield Jr.|Deion Sanders|Darrell Green|Mike Haynes|Lester Hayes|Champ Bailey|Ty Law|Charles Woodson|Asante Samuel|Darrelle Revis|Richard Sherman|Patrick Peterson|Aqib Talib|Jalen Ramsey|Stephon Gilmore|Xavien Howard|Marlon Humphrey|Jaire Alexander|Sauce Gardner|Patrick Surtain II|Trent McDuffie|Derek Stingley Jr.|Devon Witherspoon|Travis Hunter|Mel Renfro|Herb Adderley|Willie Brown|Lem Barney|Larry Wilson|Ken Houston|Cliff Harris|Jake Scott|Anthony Munoz|Jonathan Ogden|Walter Jones|Orlando Pace|Joe Thomas|Tyron Smith|Trent Williams|Jason Kelce|Larry Allen|Randall McDaniel|Gene Upshaw|Art Shell|Mike Webster|Dermontti Dawson|Will Shields|Zack Martin|Quenton Nelson|Lane Johnson|Penei Sewell|Justin Tucker|Matt Prater|Harrison Butker|Brandon Aubrey|Evan McPherson|Jake Elliott|Younghoe Koo|Nick Folk|Greg Zuerlein|Jason Myers|Nick Lowery|Jan Stenerud|Lou Groza|Pat Summerall|Ray Guy|Shane Lechler|Devin Hester|Dante Hall|Josh Cribbs|Brian Mitchell|Mel Gray|Jim Thorpe|Red Grange|Bronko Nagurski`;
+
+/* ============ UTIL ============ */
+const $=s=>document.querySelector(s);
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function norm(s){return s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[.'’-]/g,"").replace(/\b(jr|sr|ii|iii|iv)\b/g,"").replace(/[^a-z ]/g," ").replace(/\s+/g," ").trim()}
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,i)=>i);for(let i=1;i<=m;i++){let c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function tol(len){return len>=11?2:len>=6?1:0}
+function hash(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19}return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return(h^=h>>>16)>>>0}}
+function rng(seed){let a=hash(seed)();return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,r){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* precompute keys */
+CATS.forEach(c=>{c.keys=c.list.map(([n,,al])=>{const f=norm(n),parts=f.split(" ");return{full:f.replace(/ /g,""),last:parts.slice(1).join(""),alias:(al||[]).map(a=>norm(a).replace(/ /g,""))}})});
+const catById=id=>CATS.find(c=>c.id===id);
+
+/* ============ DAILY ============ */
+const ET="America/New_York";
+function etParts(d=new Date()){const o={};new Intl.DateTimeFormat("en-US",{timeZone:ET,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(d).forEach(p=>o[p.type]=p.value);return o}
+function todayKey(){const p=etParts();return `${p.year}-${p.month}-${p.day}`}
+const LAUNCH=Date.UTC(2026,10,15);
+function dayNum(key){const[y,m,d]=key.split("-").map(Number);return Math.round((Date.UTC(y,m-1,d)-LAUNCH)/864e5)+1}
+const isEra=id=>catById(id).tag==="Era";
+const REG_IDS=CATS.filter(c=>c.tag!=="Era").map(c=>c.id), ALL_IDS=CATS.map(c=>c.id);
+function rawPick(n,ids){return shuffle(ids,rng("deepball-"+n))}
+/* Board #1 (launch day) keeps its original 3 categories */
+function dailyV1(n){const prev=new Set(rawPick(n-1,REG_IDS).slice(0,3));return rawPick(n,REG_IDS).filter(id=>!prev.has(id)).slice(0,3)}
+/* From board #2 on: 2 regular categories + 1 era category, none repeated from yesterday */
+function dailyV2(n,avoid){
+  const order=rawPick(n,ALL_IDS);
+  const era=order.find(id=>isEra(id)&&!avoid.has(id))||order.find(isEra);
+  const reg=order.filter(id=>!isEra(id)&&!avoid.has(id)).slice(0,2);
+  reg.splice(Math.floor(rng("era-slot-"+n)()*3),0,era);return reg;
+}
+function dailyCats(n){
+  if(n<2)return dailyV1(n);
+  const prev=n-1<2?dailyV1(n-1):dailyV2(n-1,new Set());
+  return dailyV2(n,new Set(prev));
+}
+
+/* ============ STATE ============ */
+let mode="daily", game=null, dKey=todayKey(), dNum=dayNum(dKey);
+function newGame(ids){return{rounds:ids.map(id=>({id,found:[],strikes:0,done:false,guesses:[]})),cur:0}}
+function loadDaily(){const s=LS.get("deepball-daily-"+dKey,null);return s&&s.rounds?s:newGame(dailyCats(dNum))}
+function save(){if(mode==="daily")LS.set("deepball-daily-"+dKey,game)}
+const R=()=>game.rounds[game.cur], C=()=>catById(R().id);
+const pts=r=>r.found.reduce((s,i)=>s+i+1,0);
+
+/* ============ RENDER ============ */
+let onSummary=false;
+function firstOpen(){return game.rounds.findIndex(r=>!r.done)}
+function canOpen(i){return game.rounds[i].done||i===firstOpen()}
+function viewRound(i){
+  if(!canOpen(i))return;
+  onSummary=false;game.cur=i;
+  $("#summary").classList.add("hidden");$("#gameCard").classList.remove("hidden");
+  fb(game.rounds[i].done?"Reviewing a finished board.":"");renderBoard();
+  if(!game.rounds[i].done)$("#guess").focus();
+}
+function renderChips(){
+  const el=$("#chips");el.innerHTML="";
+  if(mode!=="daily"){el.innerHTML=`<div class="chip cur"><b>∞</b>Free Play</div>`;return}
+  game.rounds.forEach((r,i)=>{const c=catById(r.id);const d=document.createElement("button");
+    const open=canOpen(i);
+    d.className="chip"+(i===game.cur&&!onSummary?" cur":"")+(r.done?" done":"")+(open?" click":" locked");
+    d.disabled=!open;
+    d.title=r.done?`View ${c.title} board (${pts(r)} pts)`:open?"Current category":"Finish the current category to unlock";
+    d.innerHTML=`<b>${r.done?"✓":i+1}</b>${c.title}${r.done?`<span class="cp">${pts(r)}</span>`:""}`;
+    d.onclick=()=>viewRound(i);el.appendChild(d)});
+  if(allDone()){const s=document.createElement("button");s.className="chip click"+(onSummary?" cur":"");s.innerHTML="<b>★</b>Results";s.onclick=showSummary;el.appendChild(s)}
+}
+function renderBoard(anim){
+  const r=R(),c=C(),b=$("#board");
+  $("#catTitle").textContent=c.title;
+  $("#catSub").textContent=`${c.sub} · Top ${c.list.length} · ${c.tag==="Era"?"Era: "+c.era:c.tag}`;
+  b.innerHTML="";
+  c.list.forEach(([n,v],i)=>{
+    const t=document.createElement("div");const f=r.found.includes(i);
+    t.className="tile"+(f?" flip":"")+(r.done&&!f?" flip missed":"")+(i>=c.list.length*0.6?" deep":"")+(anim===i?" pop":"");
+    t.innerHTML=`<div class="in"><div class="face front"><span class="rk">${i+1}</span><span class="bar"></span></div>
+      <div class="face back"><span class="rk">${i+1}</span><div><div class="nm">${n}</div><div class="vl">${v}</div></div><span class="pts">+${i+1}</span></div></div>`;
+    b.appendChild(t);
+  });
+  if(anim!=null){const t=b.children[anim];t.classList.remove("flip");requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add("flip")))}
+  $("#roundPts").textContent=pts(r);
+  $("#foundCt").textContent=`${r.found.length}/${c.list.length}`;
+  $("#strikes").innerHTML=[0,1,2].map(i=>`<span class="strike${i<r.strikes?" x":""}">✕</span>`).join("");
+  const inp=$("#guess");inp.disabled=r.done;$("#guessForm button").disabled=r.done;$("#giveUp").classList.toggle("hidden",r.done);
+  renderEnd();renderChips();
+}
+function renderEnd(){
+  const r=R(),c=C(),bar=$("#endbar"),acts=$("#endActions");
+  if(!r.done){bar.classList.remove("show");return}
+  bar.classList.add("show");
+  const perfect=r.found.length===c.list.length;
+  $("#endMsg").innerHTML=`${perfect?"🏆 Perfect board!":r.strikes>=3?"Three strikes — round over.":"Round over."} <small>${r.found.length} of ${c.list.length} found · ${pts(r)} points</small>`;
+  acts.innerHTML="";
+  if(mode==="daily"){
+    const nx=firstOpen();
+    if(nx>=0)acts.append(mkBtn(`Next: ${catById(game.rounds[nx].id).title} →`,"primary",()=>{viewRound(nx);save()}));
+    else acts.append(mkBtn(allDoneSeen()?"Back to results →":"See today's results →","primary",showSummary));
+  }else{
+    acts.append(mkBtn("Play again","ghost",()=>startFree(r.id)),mkBtn("Random category →","primary",randomFree));
+  }
+}
+function mkBtn(t,k,fn){const b=document.createElement("button");b.className="btn "+k;b.style.padding="12px 18px";b.textContent=t;b.onclick=fn;return b}
+function fb(msg,cls){const f=$("#feedback");f.textContent=msg;f.className="feedback "+(cls||"")}
+const allDone=()=>game.rounds.every(r=>r.done);
+
+/* ============ GUESS ============ */
+function match(c,raw){
+  const q=norm(raw).replace(/ /g,"");if(q.length<3)return{t:"short"};
+  let i=c.keys.findIndex(k=>k.full===q||k.alias.includes(q));if(i>=0)return{t:"hit",i};
+  let hits=c.keys.map((k,i)=>k.last===q?i:-1).filter(i=>i>=0);
+  if(hits.length===1)return{t:"hit",i:hits[0]};if(hits.length>1)return{t:"amb",hits};
+  hits=c.keys.map((k,i)=>lev(k.full,q)<=tol(k.full.length)?i:-1).filter(i=>i>=0);
+  if(hits.length===1)return{t:"hit",i:hits[0]};
+  hits=c.keys.map((k,i)=>k.last.length>=6&&lev(k.last,q)<=1?i:-1).filter(i=>i>=0);
+  if(hits.length===1)return{t:"hit",i:hits[0]};if(hits.length>1)return{t:"amb",hits};
+  return{t:"miss"};
+}
+$("#guessForm").addEventListener("submit",e=>{
+  e.preventDefault();const inp=$("#guess"),r=R(),c=C();if(r.done)return;
+  const raw=inp.value.trim();if(!raw)return;const m=match(c,raw);
+  if(m.t==="short"){fb("Type a little more of the name.","meh");return}
+  if(m.t==="amb"){fb(`More than one ${raw} on this board — use a first name.`,"meh");return}
+  inp.value="";
+  if(m.t==="hit"){
+    if(r.found.includes(m.i)){fb(`${c.list[m.i][0]} is already on the board.`,"meh");return}
+    r.found.push(m.i);r.guesses.push(1);
+    fb(`✓ ${c.list[m.i][0]} — #${m.i+1} · +${m.i+1} pts`,"good");
+    if(r.found.length===c.list.length)r.done=true;
+    save();renderBoard(m.i);if(r.done)onRoundEnd();
+  }else{
+    r.strikes++;r.guesses.push(0);
+    fb(`✕ ${raw} isn't on this list.`,"bad");
+    const g=$("#gameCard");g.classList.remove("shake");void g.offsetWidth;g.classList.add("shake");
+    if(r.strikes>=3)r.done=true;
+    save();renderBoard();if(r.done)onRoundEnd();
+  }
+});
+/* ============ LIVE AUTOCOMPLETE (reusable) ============ */
+const POOL=(()=>{const m=new Map();
+  const add=n=>{n=n.trim();if(!n)return;const k=norm(n).replace(/ /g,"");if(!m.has(k))m.set(k,{name:n,n:norm(n)})};
+  CATS.forEach(c=>c.list.forEach(([n])=>add(n)));FILM.forEach(f=>add(f.name));EXTRA_PLAYERS.split("|").forEach(add);
+  return [...m.values()].sort((a,b)=>a.name.localeCompare(b.name));})();
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+const fold=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+function highlight(name,q){const i=fold(name).indexOf(q);
+  return i<0?esc(name):esc(name.slice(0,i))+"<mark>"+esc(name.slice(i,i+q.length))+"</mark>"+esc(name.slice(i+q.length))}
+const acAll=[];
+function makeAC(inp,box,form,opts){
+  let items=[],idx=-1;
+  function close(){box.classList.remove("show");items=[];idx=-1;inp.setAttribute("aria-expanded","false")}
+  function paint(){[...box.querySelectorAll(".opt")].forEach((o,i)=>{o.classList.toggle("on",i===idx);if(i===idx)o.scrollIntoView({block:"nearest"})})}
+  function pick(i){const p=items[i];if(!p)return;inp.value=p.name;close();form.requestSubmit()}
+  function update(){
+    const raw=inp.value.trim(),q=norm(raw);
+    if(q.length<2||opts.disabled()){close();return}
+    const used=opts.usedKeys(),scored=[];
+    for(const p of POOL){let s=-1;
+      if(p.n.startsWith(q))s=0;else if(p.n.split(" ").some(w=>w.startsWith(q)))s=1;else if(p.n.includes(q))s=2;
+      else if(p.n.replace(/ /g,"").startsWith(q.replace(/ /g,"")))s=1;
+      if(s>=0)scored.push([s,p])}
+    scored.sort((a,b)=>a[0]-b[0]||a[1].name.localeCompare(b[1].name));
+    items=scored.slice(0,8).map(x=>({...x[1],used:used.has(x[1].n.replace(/ /g,""))}));idx=items.length?0:-1;
+    const hq=fold(raw);
+    box.innerHTML=items.length?items.map((p,i)=>`<div class="opt${i===idx?" on":""}" role="option" data-i="${i}"><span>${highlight(p.name,hq)}</span>${p.used?`<small>${opts.usedLabel}</small>`:""}</div>`).join("")
+      :`<div class="none">No suggestions — press Enter to guess "${esc(raw)}"</div>`;
+    box.classList.add("show");inp.setAttribute("aria-expanded","true");
+  }
+  inp.addEventListener("input",update);inp.addEventListener("focus",update);
+  inp.addEventListener("keydown",e=>{
+    if(!box.classList.contains("show")||!items.length){if(e.key==="Escape")close();return}
+    if(e.key==="ArrowDown"){e.preventDefault();idx=(idx+1)%items.length;paint()}
+    else if(e.key==="ArrowUp"){e.preventDefault();idx=(idx-1+items.length)%items.length;paint()}
+    else if(e.key==="Enter"||e.key==="Tab"){if(idx>=0){e.preventDefault();pick(idx)}}
+    else if(e.key==="Escape")close();
+  });
+  box.addEventListener("mousedown",e=>{const o=e.target.closest(".opt");if(o){e.preventDefault();pick(+o.dataset.i)}});
+  form.addEventListener("submit",close,true);
+  acAll.push({close,inp});
+}
+document.addEventListener("click",e=>{acAll.forEach(a=>{if(!a.inp.parentElement.contains(e.target))a.close()})});
+makeAC($("#guess"),$("#ac"),$("#guessForm"),{
+  disabled:()=>R().done, usedLabel:"On board",
+  usedKeys:()=>{const c=C();return new Set(R().found.map(i=>c.keys[i].full))}
+});
+
+$("#giveUp").onclick=()=>{const r=R();if(r.done)return;r.done=true;save();fb("Board revealed.","meh");renderBoard();onRoundEnd()};
+function onRoundEnd(){if(mode==="free"){const b=LS.get("deepball-best",{});const p=pts(R());if(!b[R().id]||p>b[R().id]){b[R().id]=p;LS.set("deepball-best",b)}}}
+
+/* ============ SUMMARY ============ */
+function recordStats(){
+  const st=LS.get("deepball-stats",{played:0,best:0,streak:0,maxStreak:0,last:0,total:0});
+  if(st.last===dNum)return st;
+  const total=game.rounds.reduce((s,r)=>s+pts(r),0);
+  st.streak=st.last===dNum-1?st.streak+1:1;st.maxStreak=Math.max(st.maxStreak,st.streak);
+  st.played++;st.best=Math.max(st.best,total);st.total+=total;st.last=dNum;LS.set("deepball-stats",st);return st;
+}
+function allDoneSeen(){const st=LS.get("deepball-stats",{});return st.last===dNum}
+function showSummary(){
+  const st=recordStats();onSummary=true;
+  $("#gameCard").classList.add("hidden");$("#summary").classList.remove("hidden");
+  const total=game.rounds.reduce((s,r)=>s+pts(r),0);
+  $("#sumEyebrow").textContent=`Deep Ball #${dNum} complete`;
+  $("#sumScore").textContent=total;
+  $("#sumRows").innerHTML=game.rounds.map((r,i)=>{const c=catById(r.id);return`<button class="srow" data-i="${i}"><div><div class="t">${c.title}</div><div class="s">${r.found.length}/${c.list.length} found · ${"✕".repeat(r.strikes)||"no strikes"} · <span class="viewlink">View board →</span></div></div><div class="p">${pts(r)}</div></button>`}).join("");
+  document.querySelectorAll("#sumRows .srow").forEach(b=>b.onclick=()=>viewRound(+b.dataset.i));
+  $("#statsGrid").innerHTML=[["Played",st.played],["Best",st.best],["Streak",st.streak],["Avg",st.played?Math.round(st.total/st.played):0]].map(([l,v])=>`<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  renderChips();
+}
+function shareText(){
+  const total=game.rounds.reduce((s,r)=>s+pts(r),0);
+  const lines=game.rounds.map(r=>{const c=catById(r.id);const sq=r.guesses.map(g=>g?"🟩":"🟥").join("")||"⬛";return`${c.title}: ${pts(r)} pts ${sq}`});
+  return `🏈 Deep Ball #${dNum} — ${total} pts\n${lines.join("\n")}`;
+}
+$("#shareBtn").onclick=async()=>{const t=shareText();try{await navigator.clipboard.writeText(t);$("#shareBtn").textContent="Copied! ✓";setTimeout(()=>$("#shareBtn").textContent="Copy results",1800)}catch(e){const b=$("#shareBox");b.value=t;b.style.display="block";b.select()}};
+$("#reviewBtn").onclick=()=>viewRound(0);
+$("#toFree").onclick=()=>setView("free");
+function tick(){const p=etParts();const left=86400-(+p.hour*3600+ +p.minute*60+ +p.second);const h=String(Math.floor(left/3600)).padStart(2,"0"),m=String(Math.floor(left%3600/60)).padStart(2,"0"),s=String(left%60).padStart(2,"0");document.querySelectorAll(".cdown").forEach(e=>e.textContent=`${h}:${m}:${s}`);
+  if(todayKey()!==dKey){dKey=todayKey();dNum=dayNum(dKey);if(!$("#viewGame").classList.contains("hidden")&&mode==="daily")startDaily();if(!$("#viewFilm").classList.contains("hidden")&&film&&!film.practice)startFilmDaily()}}
+setInterval(tick,1000);
+
+/* ============ VIEWS ============ */
+function startDaily(){
+  mode="daily";game=loadDaily();
+  $("#heroEyebrow").textContent=`Daily Board · #${dNum}`;
+  $("#heroTitle").textContent=new Date(dKey+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  $("#heroSub").textContent="Three new categories every day. Dig deep — every rank is worth its number in points.";
+  fb("");
+  if(allDone()){showSummary();return}
+  onSummary=false;$("#summary").classList.add("hidden");$("#gameCard").classList.remove("hidden");
+  game.cur=firstOpen();renderBoard();
+}
+function startFree(id){
+  mode="free";game=newGame([id]);showGameView();
+  $("#heroEyebrow").textContent="Free Play";$("#heroTitle").textContent=catById(id).title;
+  $("#heroSub").textContent="Practice round — doesn't affect your daily stats.";
+  $("#summary").classList.add("hidden");$("#gameCard").classList.remove("hidden");fb("");renderBoard();$("#guess").focus();
+}
+function randomFree(){const ids=CATS.map(c=>c.id).filter(id=>!game||id!==R().id);startFree(ids[Math.floor(Math.random()*ids.length)])}
+let freeFilter="All";
+const FILTERS=["All","Career","Single season","Era: 1990s","Era: 2010s"];
+const passFilter=(c,f)=>f==="All"||(f.startsWith("Era: ")?c.era===f.slice(5):c.tag===f);
+function renderFree(){const best=LS.get("deepball-best",{});
+  $("#filters").innerHTML=FILTERS.map(f=>`<button class="${f===freeFilter?"on":""}" data-f="${f}">${f}<span class="n">${CATS.filter(c=>passFilter(c,f)).length}</span></button>`).join("");
+  document.querySelectorAll("#filters button").forEach(b=>b.onclick=()=>{freeFilter=b.dataset.f;renderFree()});
+  $("#freeGrid").innerHTML=CATS.filter(c=>passFilter(c,freeFilter)).map(c=>`<button class="card fcat" data-id="${c.id}"><span class="tag${c.tag==="Career"?"":c.tag==="Era"?" era":" ss"}">${c.tag==="Era"?"Era · "+c.era:c.tag}</span><h4>${c.title}</h4><p>${c.sub} · Top ${c.list.length}</p><div class="best">${best[c.id]!=null?`Best: ${best[c.id]} / ${c.list.length*(c.list.length+1)/2} pts`:"Not played yet"}</div></button>`).join("");
+  document.querySelectorAll(".fcat").forEach(b=>b.onclick=()=>startFree(b.dataset.id));}
+function showGameView(){$("#viewGame").classList.remove("hidden");$("#viewFree").classList.add("hidden");$("#viewFilm").classList.add("hidden");document.querySelectorAll("nav [data-view]").forEach(b=>b.classList.toggle("on",b.dataset.view===(mode==="daily"?"daily":"free")))}
+function setView(v){
+  document.querySelectorAll("nav [data-view]").forEach(b=>b.classList.toggle("on",b.dataset.view===v));
+  ["viewGame","viewFree","viewFilm"].forEach(id=>$("#"+id).classList.add("hidden"));
+  if(v==="daily"){$("#viewGame").classList.remove("hidden");startDaily()}
+  else if(v==="free"){$("#viewFree").classList.remove("hidden");renderFree()}
+  else{$("#viewFilm").classList.remove("hidden");if(!film||(film.date!==dKey&&!film.practice))startFilmDaily();else renderFilm()}
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("nav [data-view]").forEach(b=>b.onclick=()=>setView(b.dataset.view));
+$("#randomBtn").onclick=randomFree;
+$("#howBtn").onclick=()=>$("#howModal").classList.add("show");
+$("#closeHow").onclick=()=>{$("#howModal").classList.remove("show");LS.set("deepball-seen",1);$("#guess").focus()};
+$("#howModal").onclick=e=>{if(e.target.id==="howModal")$("#closeHow").click()};
+
+/* ============ FILM ROOM ============ */
+const FPTS=[100,80,60,40,20];
+FILM.forEach(f=>{const n=norm(f.name);f.key={full:n.replace(/ /g,""),last:n.split(" ").slice(1).join(""),alias:(f.aliases||[]).map(a=>norm(a).replace(/ /g,""))}});
+let film=null;
+function filmPicks(n){
+  const N=FILM.length,k=Math.max(0,n-1),cyc=Math.floor(k/N);
+  const perm=shuffle(FILM.map((_,i)=>i),rng("film-cycle-"+cyc));
+  return [perm[k%N]];
+}
+function newFilm(ids,practice){return{date:dKey,practice:!!practice,cur:0,players:ids.map(i=>({i,shown:1,status:"play",pts:0,log:[]}))}}
+function saveFilm(){if(film&&!film.practice)LS.set("deepball-film3-"+dKey,film)}
+function startFilmDaily(){
+  const s=LS.get("deepball-film3-"+dKey,null);
+  film=s&&s.players?s:newFilm(filmPicks(dNum));
+  showFilmCard();ffb("");
+  const open=film.players.findIndex(p=>p.status==="play");
+  if(open<0){film.cur=0;renderFilm();return}
+  film.cur=open;renderFilm();
+}
+function startFilmPractice(){
+  const daily=new Set(filmPicks(dNum));
+  const pool=FILM.map((_,i)=>i).filter(i=>!daily.has(i));
+  film=newFilm(shuffle(pool,Math.random).slice(0,1),true);showFilmCard();ffb("");renderFilm();$("#filmGuess").focus();
+}
+const FP=()=>film.players[film.cur], FD=()=>FILM[FP().i];
+const filmTotal=()=>film.players.reduce((s,p)=>s+p.pts,0);
+const filmDone=()=>film.players.every(p=>p.status!=="play");
+function ffb(m,c){const f=$("#filmFb");f.textContent=m;f.className="feedback "+(c||"")}
+function renderFilm(){
+  const done=filmDone();
+  $("#filmEyebrow").textContent=film.practice?"Film Room · Practice":`Film Room · Daily #${dNum}`;
+  const first=film.players.findIndex(q=>q.status==="play");
+  $("#filmDots").innerHTML=film.players.map((p,i)=>{const ok=p.status!=="play"||i===first;
+    return `<button class="dot${i===film.cur&&$("#filmSummary").classList.contains("hidden")?" cur":""}${p.status==="won"?" won":p.status==="lost"?" lost":""}" data-i="${i}" title="Player ${i+1}" ${ok?"":"disabled"} style="cursor:${ok?"pointer":"default"};font-family:inherit">${p.status==="won"?"✓":p.status==="lost"?"✕":i+1}</button>`}).join("")
+    +(done?`<button class="dot" id="fsDot" title="Results" style="cursor:pointer;font-family:inherit;width:auto;padding:0 12px">★ Results</button>`:"");
+  document.querySelectorAll("#filmDots .dot[data-i]").forEach(b=>b.onclick=()=>{film.cur=+b.dataset.i;showFilmCard();ffb("");renderFilm()});
+  const sd=$("#fsDot");if(sd)sd.onclick=showFilmSummary;
+  const p=FP(),f=FD(),playing=p.status==="play";
+  $("#filmTitle").textContent=film.practice?"Practice tape":`Today's mystery player`;
+  $("#filmDots").classList.toggle("hidden",film.players.length===1);
+  const posName={QB:"Quarterback",RB:"Running back",WR:"Wide receiver",TE:"Tight end"}[f.pos]||"";
+  $("#filmSub").textContent=`${posName} · `+(playing?`Clue ${p.shown} of 5 revealed`:p.status==="won"?`Identified on clue ${p.shown}`:"Not identified");
+  $("#filmTotal").textContent=filmTotal();
+  $("#filmPot").textContent=playing?FPTS[p.shown-1]:p.pts;
+  const lit=playing?6-p.shown:p.pts/20;
+  $("#filmMeter").innerHTML=FPTS.map((_,k)=>`<i class="${k<lit?"on":""}"></i>`).join("");
+  $("#filmClues").innerHTML=f.clues.map((c,k)=>{const vis=k<p.shown||!playing;
+    return `<div class="clue${vis?"":" locked"}${k===p.shown-1&&playing?" latest":""}"><span class="n">${k+1}</span><span class="t">${vis?esc(c):"Locked clue — keep guessing to reveal"}</span></div>`}).join("");
+  $("#filmForm").classList.toggle("hidden",!playing);
+  $("#filmNext").classList.toggle("hidden",!playing);
+  $("#filmNext").textContent=p.shown<5?"Next clue (−20)":"Give up";
+  const rv=$("#filmReveal");
+  if(playing){rv.className="reveal";rv.innerHTML="";return}
+  rv.className="reveal show "+(p.status==="won"?"win":"loss");
+  rv.innerHTML=`<div class="eyebrow">${p.status==="won"?`Nailed it · +${p.pts} pts`:"The tape doesn't lie"}</div><div class="who">${esc(f.name)}</div>
+    <div style="color:var(--muted);font-size:14px">${p.log.length?"Your guesses: "+p.log.map(esc).join(" · "):"No guesses"}</div><div class="actions"></div>`;
+  const a=rv.querySelector(".actions");
+  if(first>=0)a.append(mkBtn("Next player →","primary",()=>{film.cur=first;saveFilm();ffb("");renderFilm();$("#filmGuess").focus()}));
+  else if(film.players.length>1)a.append(mkBtn(film.practice?"See practice results →":"See today's results →","primary",showFilmSummary));
+  else{
+    if(!film.practice){const cb=mkBtn("Copy result","primary",async()=>{const t=filmShareText();try{await navigator.clipboard.writeText(t);cb.textContent="Copied! ✓";setTimeout(()=>cb.textContent="Copy result",1800)}catch(e){const b=$("#fsShareBox").cloneNode();b.value=t;b.style.display="block";rv.append(b);b.select()}});a.append(cb)}
+    a.append(mkBtn(film.practice?"Another practice player →":"Practice with another player →",film.practice?"primary":"ghost",startFilmPractice));
+    if(film.practice&&FILM_TODAY_DONE())a.append(mkBtn("Back to today's player","ghost",startFilmDaily));
+    const cd=document.createElement("div");cd.className="countdown";cd.innerHTML='Next mystery player in <b class="cdown">--:--:--</b>';rv.append(cd);tick();
+  }
+}
+function showFilmCard(){$("#filmSummary").classList.add("hidden");$("#filmCard").classList.remove("hidden")}
+function filmMatch(f,raw){
+  const q=norm(raw).replace(/ /g,"");if(q.length<3)return"short";
+  const k=f.key;
+  if(q===k.full||k.alias.includes(q)||q===k.last)return"hit";
+  if(lev(k.full,q)<=tol(k.full.length))return"hit";
+  return"miss";
+}
+$("#filmForm").addEventListener("submit",e=>{
+  e.preventDefault();const inp=$("#filmGuess"),p=FP(),f=FD();if(p.status!=="play")return;
+  const raw=inp.value.trim();if(!raw)return;
+  const m=filmMatch(f,raw);
+  if(m==="short"){ffb("Type a little more of the name.","meh");return}
+  inp.value="";p.log.push(raw);
+  if(m==="hit"){p.status="won";p.pts=FPTS[p.shown-1];ffb("");saveFilm();renderFilm();onFilmEnd();return}
+  let over=false;
+  if(p.shown<5){p.shown++}else{p.status="lost";p.pts=0;over=true}
+  ffb(over?`✕ Not ${raw}. Out of clues.`:`✕ Not ${raw}. Clue ${p.shown} unlocked.`,"bad");
+  const g=$("#filmCard");g.classList.remove("shake");void g.offsetWidth;g.classList.add("shake");
+  saveFilm();renderFilm();if(over)onFilmEnd();
+});
+$("#filmNext").onclick=()=>{const p=FP();if(p.status!=="play")return;
+  if(p.shown<5){p.shown++;ffb(`Clue ${p.shown} unlocked.`,"meh")}else{p.status="lost";p.pts=0;ffb("")}
+  saveFilm();renderFilm();if(p.status!=="play")onFilmEnd();else $("#filmGuess").focus()};
+function onFilmEnd(){
+  if(filmDone()&&!film.practice){const st=LS.get("deepball-filmstats",{played:0,best:0,last:0,total:0});
+    if(st.last!==dNum){st.played++;st.total+=filmTotal();st.best=Math.max(st.best,filmTotal());st.last=dNum;LS.set("deepball-filmstats",st)}}
+}
+function showFilmSummary(){
+  $("#filmCard").classList.add("hidden");$("#filmSummary").classList.remove("hidden");
+  $("#fsEyebrow").textContent=film.practice?"Practice complete":`Film Room #${dNum} complete`;
+  $("#fsScore").textContent=filmTotal();
+  $("#fsShare").classList.toggle("hidden",film.practice);
+  $("#fsRows").innerHTML=film.players.map((p,i)=>`<button class="srow" data-i="${i}"><div><div class="t">${esc(FILM[p.i].name)}</div><div class="s">${p.status==="won"?`Got him on clue ${p.shown}`:"Missed"} · <span class="viewlink">View report →</span></div></div><div class="p">${p.pts}</div></button>`).join("");
+  document.querySelectorAll("#fsRows .srow").forEach(b=>b.onclick=()=>{film.cur=+b.dataset.i;showFilmCard();ffb("");renderFilm()});
+  $("#fsShareBox").style.display="none";
+  renderFilmDotsOnly();
+}
+function renderFilmDotsOnly(){const keep=film.cur;renderFilm();film.cur=keep}
+function FILM_TODAY_DONE(){const s=LS.get("deepball-film3-"+dKey,null);return !!(s&&s.players&&s.players.every(p=>p.status!=="play"))}
+function filmShareText(){
+  const p=film.players[0],max=film.players.length*100;
+  const sq=[1,2,3,4,5].map(k=>p.status==="won"&&k===p.shown?"🟩":k<=p.shown?"🟥":"⬜").join("");
+  return `🎬 Film Room #${dNum} — ${filmTotal()}/${max}\n${p.status==="won"?`Got him on clue ${p.shown}`:"Stumped"} ${sq}`;
+}
+$("#fsShare").onclick=async()=>{const t=filmShareText();try{await navigator.clipboard.writeText(t);$("#fsShare").textContent="Copied! ✓";setTimeout(()=>$("#fsShare").textContent="Copy results",1800)}catch(e){const b=$("#fsShareBox");b.value=t;b.style.display="block";b.select()}};
+$("#fsPractice").onclick=startFilmPractice;
+makeAC($("#filmGuess"),$("#filmAc"),$("#filmForm"),{disabled:()=>!film||FP().status!=="play",usedLabel:"",usedKeys:()=>new Set()});
+
+startDaily();tick();
+if(!LS.get("deepball-seen",0))$("#howModal").classList.add("show");
+</script>
+</body>
+</html>
